@@ -31,7 +31,7 @@ model Product {
   name           String
   description    String
   price          Float
-  photo          String?
+  photo          String
   available      Boolean      @default(true)
   entrepreneur   Entrepreneur @relation(fields: [entrepreneurId], references: [id])
   entrepreneurId String
