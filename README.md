@@ -51,3 +51,6 @@ npm run start:dev
 ## 🌐 Documentación
 
 Una vez levantado el servidor, accedé a la documentación en:
+http://localhost:3000/api
+
+
