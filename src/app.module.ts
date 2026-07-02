@@ -7,11 +7,13 @@ import { ProductModule } from './product/product.module';
 import { ClickModule } from './click/click.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import appConfig from './common/config/app.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [appConfig],
     }),
 
     PrismaModule,
