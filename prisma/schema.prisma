@@ -37,6 +37,10 @@ model Product {
   entrepreneurId String
   clicks         Click[]
   createdAt      DateTime     @default(now())
+
+  @@index([entrepreneurId])
+  @@index([available])
+  @@index([entrepreneurId, available])
 }
 
 model Click {
@@ -44,4 +48,6 @@ model Click {
   date      DateTime @default(now())
   product   Product  @relation(fields: [productId], references: [id])
   productId String
+
+  @@index([productId])
 }

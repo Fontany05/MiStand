@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,8 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import type { RequestWithUser } from '../auth/interface/request.interface';
 import { ProductResponse } from './interface/product.interface';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FilterProductDto } from './dto/filter-product.dto';
+import { PaginatedProductResponse } from './interface/product.interface';
 
 @ApiTags('Product')
 @Controller('product')
@@ -37,8 +40,9 @@ export class ProductController {
   @ApiOperation({ summary: 'Mostrar producto' })
   getByStand(
     @Param('entrepreneurId') entrepreneurId: string,
-  ): Promise<ProductResponse[]> {
-    return this.productService.getProductsByStand(entrepreneurId);
+    @Query() filters: FilterProductDto,
+  ): Promise<PaginatedProductResponse> {
+    return this.productService.getProductsByStand(entrepreneurId, filters);
   }
 
   @Patch(':id')

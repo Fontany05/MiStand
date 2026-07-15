@@ -8,3 +8,11 @@ export interface ProductResponse {
   entrepreneurId: string;
   createdAt: Date;
 }
+
+export interface PaginatedProductResponse {
+  data: ProductResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
