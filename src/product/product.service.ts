@@ -8,7 +8,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductResponse } from './interface/product.interface';
 import { FilterProductDto, ProductOrderBy } from './dto/filter-product.dto';
-import { PaginatedProductResponse } from '../../dist/product/interface/product.interface';
+import { PaginatedProductResponse } from './interface/product.interface';
 
 @Injectable()
 export class ProductService {
