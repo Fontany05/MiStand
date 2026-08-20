@@ -4,7 +4,9 @@ API REST para gestión de stands digitales para emprendedores que venden product
 
 ## 📋 Descripción
 
-MiStand permite a emprendedores mostrar su catálogo en tiempo real, comunicar dónde están cada fin de semana y recibir consultas directamente por WhatsApp.
+MiStand — Plataforma de gestión para emprendedores que venden principalmente por WhatsApp, actualmente en desarrollo.
+
+MiStand busca resolver el caos de gestionar consultas y pedidos que surgen de las conversaciones de WhatsApp, evitando depender del papel, la memoria o múltiples conversaciones para organizar el día a día del emprendimiento. Incluye una vitrina digital para mostrar productos y facilitar el contacto con clientes, manteniendo WhatsApp como canal de comunicación y venta
 
 ## 🚀 Stack tecnológico
 
