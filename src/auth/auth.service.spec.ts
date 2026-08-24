@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { faker } from '@faker-js/faker';
+import { createRegisterDto } from 'src/test/helpers/auth.helper';
 
 const mockPrismaService = {
   entrepreneur: {
@@ -34,66 +36,54 @@ describe('AuthService', () => {
 
   describe('register', () => {
     it('should create a new entrepreneur and return token', async () => {
+      const dto = createRegisterDto();
+
       mockPrismaService.entrepreneur.findUnique.mockResolvedValue(null);
       mockPrismaService.entrepreneur.create.mockResolvedValue({
-        id: 'uuid-123',
-        name: 'Ana García',
-        email: 'ana@gmail.com',
-        standName: 'Stand de Ana',
+        id: faker.string.uuid(),
+        name: dto.name,
+        email: dto.email,
+        standName: dto.standName,
       });
-
-      const result = await service.register({
-        name: 'Ana García',
-        email: 'ana@gmail.com',
-        password: '123456',
-        standName: 'Stand de Ana',
-        phone: '1234567890',
-      });
+      const result = await service.register(dto);
 
       expect(result.token).toBe('mock-token');
-      expect(result.entrepreneur.email).toBe('ana@gmail.com');
+      expect(result.entrepreneur.email).toBe(dto.email);
       expect(mockPrismaService.entrepreneur.findUnique).toHaveBeenCalledWith({
-        where: { email: 'ana@gmail.com' },
+        where: { email: dto.email },
       });
     });
 
     it('should throw BadRequestException if email already exists', async () => {
+      const dto = createRegisterDto();
       mockPrismaService.entrepreneur.findUnique.mockResolvedValue({
-        id: 'uuid-123',
-        email: 'ana@gmail.com',
+        id: faker.string.uuid(),
+        email: dto.email,
       });
-
-      await expect(
-        service.register({
-          name: 'Ana García',
-          email: 'ana@gmail.com',
-          password: '123456',
-          standName: 'Stand de Ana',
-          phone: '1234567890',
-        }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.register(dto)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('login', () => {
+    const dto = createRegisterDto();
     it('should return token when credentials are valid', async () => {
-      const hashedPassword = await bcrypt.hash('123456', 10);
+      const hashedPassword = await bcrypt.hash(dto.password, 10);
 
       mockPrismaService.entrepreneur.findUnique.mockResolvedValue({
-        id: 'uuid-123',
-        name: 'Ana García',
-        email: 'ana@gmail.com',
+        id: faker.string.uuid(),
+        name: dto.name,
+        email: dto.email,
         password: hashedPassword,
-        standName: 'Stand de Ana',
+        standName: dto.standName,
       });
 
       const result = await service.login({
-        email: 'ana@gmail.com',
-        password: '123456',
+        email: dto.email,
+        password: dto.password,
       });
 
       expect(result.token).toBe('mock-token');
-      expect(result.entrepreneur.email).toBe('ana@gmail.com');
+      expect(result.entrepreneur.email).toBe(dto.email);
     });
 
     it('should throw UnauthorizedException if email does not exist', async () => {
@@ -101,25 +91,25 @@ describe('AuthService', () => {
 
       await expect(
         service.login({
-          email: 'noexiste@gmail.com',
-          password: '123456',
+          email: faker.internet.email(),
+          password: faker.internet.password({ length: 8 }),
         }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if password is incorrect', async () => {
-      const hashedPassword = await bcrypt.hash('123456', 10);
+      const hashedPassword = await bcrypt.hash(dto.password, 10);
 
       mockPrismaService.entrepreneur.findUnique.mockResolvedValue({
-        id: 'uuid-123',
-        email: 'ana@gmail.com',
+        id: faker.string.uuid(),
+        email: dto.email,
         password: hashedPassword,
       });
 
       await expect(
         service.login({
-          email: 'ana@gmail.com',
-          password: 'password-incorrecto',
+          email: dto.email,
+          password: faker.internet.password({ length: 8 }),
         }),
       ).rejects.toThrow(UnauthorizedException);
     });

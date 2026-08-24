@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EntrepreneurService } from './entrepreneur.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
+import { createMockEntrepreneur } from 'src/test/helpers/entrepreneur.helper';
 
 const mockPrismaService = {
   entrepreneur: {
@@ -9,17 +10,6 @@ const mockPrismaService = {
     update: jest.fn(),
     delete: jest.fn(),
   },
-};
-
-const mockEntrepreneur = {
-  id: 'uuid-123',
-  name: 'Ana García',
-  email: 'ana@gmail.com',
-  standName: 'Stand de Ana',
-  description: null,
-  currentLocation: null,
-  phone: '1234567890',
-  createdAt: new Date(),
 };
 
 describe('EntrepreneurService', () => {
@@ -43,11 +33,12 @@ describe('EntrepreneurService', () => {
 
   describe('getProfile', () => {
     it('should return entrepreneur profile', async () => {
+      const mockEntrepreneur = createMockEntrepreneur();
       mockPrismaService.entrepreneur.findUnique.mockResolvedValue(
         mockEntrepreneur,
       );
 
-      const result = await service.getProfile('uuid-123');
+      const result = await service.getProfile(mockEntrepreneur.id);
 
       expect(result).toEqual(mockEntrepreneur);
       expect(mockPrismaService.entrepreneur.findUnique).toHaveBeenCalled();
@@ -64,12 +55,13 @@ describe('EntrepreneurService', () => {
 
   describe('deleteProfile', () => {
     it('should delete entrepreneur and return message', async () => {
+      const mockEntrepreneur = createMockEntrepreneur();
       mockPrismaService.entrepreneur.findUnique.mockResolvedValue(
         mockEntrepreneur,
       );
       mockPrismaService.entrepreneur.delete.mockResolvedValue(mockEntrepreneur);
 
-      const result = await service.deleteProfile('uuid-123');
+      const result = await service.deleteProfile(mockEntrepreneur.id);
 
       expect(result).toEqual({ message: 'Account deleted successfully' });
     });

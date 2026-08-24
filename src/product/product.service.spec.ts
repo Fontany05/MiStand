@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductService } from './product.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { createMockProduct } from '../test/helpers/product.helper';
 
 const mockPrismaService = {
   product: {
@@ -12,17 +13,6 @@ const mockPrismaService = {
     delete: jest.fn(),
     count: jest.fn(),
   },
-};
-
-const mockProduct = {
-  id: 'product-uuid-123',
-  name: 'Taza artesanal',
-  description: 'Taza hecha a mano',
-  price: 1500,
-  photo: 'https://ejemplo.com/taza.jpg',
-  available: true,
-  entrepreneurId: 'entrepreneur-uuid-123',
-  createdAt: new Date(),
 };
 
 describe('ProductService', () => {
@@ -46,13 +36,14 @@ describe('ProductService', () => {
 
   describe('createProduct', () => {
     it('should create a product', async () => {
+      const mockProduct = createMockProduct();
       mockPrismaService.product.create.mockResolvedValue(mockProduct);
 
-      const result = await service.createProduct('entrepreneur-uuid-123', {
-        name: 'Taza artesanal',
-        description: 'Taza hecha a mano',
-        price: 1500,
-        photo: 'https://ejemplo.com/taza.jpg',
+      const result = await service.createProduct(mockProduct.entrepreneurId, {
+        name: mockProduct.name,
+        description: mockProduct.description,
+        price: mockProduct.price,
+        photo: mockProduct.photo,
       });
 
       expect(result).toEqual(mockProduct);
@@ -62,12 +53,13 @@ describe('ProductService', () => {
 
   describe('deleteProduct', () => {
     it('should delete a product', async () => {
+      const mockProduct = createMockProduct();
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
       mockPrismaService.product.delete.mockResolvedValue(mockProduct);
 
       const result = await service.deleteProduct(
-        'product-uuid-123',
-        'entrepreneur-uuid-123',
+        mockProduct.id,
+        mockProduct.entrepreneurId,
       );
 
       expect(result).toEqual({ message: 'Product deleted successfully' });
@@ -76,19 +68,23 @@ describe('ProductService', () => {
     it('should throw NotFoundException if product does not exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
+      const mockProduct = createMockProduct();
       await expect(
-        service.deleteProduct('uuid-invalido', 'entrepreneur-uuid-123'),
+        service.deleteProduct(mockProduct.id, mockProduct.entrepreneurId),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException if product does not belong to entrepreneur', async () => {
+      const mockProduct = createMockProduct();
+      const otherEntrepreneurId = createMockProduct().entrepreneurId;
+
       mockPrismaService.product.findUnique.mockResolvedValue({
         ...mockProduct,
-        entrepreneurId: 'otro-entrepreneur-uuid',
+        entrepreneurId: otherEntrepreneurId,
       });
 
       await expect(
-        service.deleteProduct('product-uuid-123', 'entrepreneur-uuid-123'),
+        service.deleteProduct(mockProduct.id, mockProduct.entrepreneurId),
       ).rejects.toThrow(ForbiddenException);
     });
   });
