@@ -23,6 +23,7 @@ model Entrepreneur {
   currentLocation String?
   phone           String
   products        Product[]
+  orders          Order[]
   createdAt       DateTime  @default(now())
 }
 
@@ -36,6 +37,7 @@ model Product {
   entrepreneur   Entrepreneur @relation(fields: [entrepreneurId], references: [id])
   entrepreneurId String
   clicks         Click[]
+  orders         Order[]
   createdAt      DateTime     @default(now())
 
   @@index([entrepreneurId])
@@ -50,4 +52,28 @@ model Click {
   productId String
 
   @@index([productId])
+}
+
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id             String       @id @default(uuid())
+  status         OrderStatus  @default(PENDING)
+  notes          String?
+  clientName     String
+  clientPhone    String
+  product        Product      @relation(fields: [productId], references: [id])
+  productId      String
+  entrepreneur   Entrepreneur @relation(fields: [entrepreneurId], references: [id])
+  entrepreneurId String
+  createdAt      DateTime     @default(now())
+
+  @@index([entrepreneurId])
+  @@index([status])
 }
