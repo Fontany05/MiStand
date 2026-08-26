@@ -1,18 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 
-describe('OrderService', () => {
-  let service: OrderService;
+const mockOrderService = {
+  createOrder: jest.fn(),
+  getOrders: jest.fn(),
+  updateOrderStatus: jest.fn(),
+  deleteOrder: jest.fn(),
+};
+
+describe('OrderController', () => {
+  let controller: OrderController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [OrderService],
+      controllers: [OrderController],
+      providers: [{ provide: OrderService, useValue: mockOrderService }],
     }).compile();
 
-    service = module.get<OrderService>(OrderService);
+    controller = module.get<OrderController>(OrderController);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });
