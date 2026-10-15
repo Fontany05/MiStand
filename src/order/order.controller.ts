@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -13,9 +14,13 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import type { RequestWithUser } from 'src/auth/interface/request.interface';
-import type { Order } from './interface/order.interface';
+import type {
+  Order,
+  PaginatedOrderResponse,
+} from './interface/order.interface';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
+import { FilterOrderDto } from './dto/filter-order.dto';
 @ApiTags('Order')
 @Controller('order')
 @UseGuards(JwtGuard)
@@ -33,9 +38,12 @@ export class OrderController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Mostrar pedido del emprendedor' })
-  getOrders(@Request() req: RequestWithUser): Promise<Order[]> {
-    return this.orderService.getOrders(req.user.id);
+  @ApiOperation({ summary: 'Mostrar pedidos del emprendedor' })
+  getOrders(
+    @Request() req: RequestWithUser,
+    @Query() filters: FilterOrderDto,
+  ): Promise<PaginatedOrderResponse> {
+    return this.orderService.getOrders(req.user.id, filters);
   }
 
   @Patch(':id/status')

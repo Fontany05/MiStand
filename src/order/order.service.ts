@@ -8,6 +8,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { Order } from './interface/order.interface';
 import { OrderStatus } from '@prisma/client';
+import { FilterOrderDto } from './dto/filter-order.dto';
+import { PaginatedOrderResponse } from './interface/order.interface';
 
 @Injectable()
 export class OrderService {
@@ -25,10 +27,36 @@ export class OrderService {
     });
   }
 
-  async getOrders(entrepreneurId: string): Promise<Order[]> {
-    return this.prisma.order.findMany({
-      where: { entrepreneurId },
-    });
+  async getOrders(
+    entrepreneurId: string,
+    filters: FilterOrderDto,
+  ): Promise<PaginatedOrderResponse> {
+    const { status, page = 1, limit = 10 } = filters;
+
+    const skip = (page - 1) * limit;
+
+    const where = {
+      entrepreneurId,
+      ...(status && { status }),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async updateOrderStatus(

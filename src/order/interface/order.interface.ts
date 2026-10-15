@@ -10,3 +10,11 @@ export interface Order {
   entrepreneurId: string;
   createdAt: Date;
 }
+
+export interface PaginatedOrderResponse {
+  data: Order[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
