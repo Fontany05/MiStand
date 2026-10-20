@@ -8,6 +8,7 @@ import { ClickModule } from './click/click.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { OrderModule } from './order/order.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import appConfig from './common/config/app.config';
 
 @Module({
@@ -23,6 +24,7 @@ import appConfig from './common/config/app.config';
     ClickModule,
     AuthModule,
     OrderModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

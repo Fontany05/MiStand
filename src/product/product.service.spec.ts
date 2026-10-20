@@ -3,6 +3,7 @@ import { ProductService } from './product.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { createMockProduct } from '../test/helpers/product.helper';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 const mockPrismaService = {
   product: {
@@ -23,6 +24,7 @@ describe('ProductService', () => {
       providers: [
         ProductService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: CloudinaryService, useValue: mockCloudinaryService },
       ],
     }).compile();
 
@@ -35,19 +37,36 @@ describe('ProductService', () => {
   });
 
   describe('createProduct', () => {
-    it('should create a product', async () => {
+    it('should upload the photo and create a product', async () => {
       const mockProduct = createMockProduct();
+      const file = { buffer: Buffer.from('fake-image') } as Express.Multer.File;
+
+      mockCloudinaryService.uploadImage.mockResolvedValue({
+        secure_url: mockProduct.photo,
+      });
       mockPrismaService.product.create.mockResolvedValue(mockProduct);
 
-      const result = await service.createProduct(mockProduct.entrepreneurId, {
-        name: mockProduct.name,
-        description: mockProduct.description,
-        price: mockProduct.price,
-        photo: mockProduct.photo,
-      });
+      const result = await service.createProduct(
+        mockProduct.entrepreneurId,
+        {
+          name: mockProduct.name,
+          description: mockProduct.description,
+          price: mockProduct.price,
+        },
+        file,
+      );
 
+      expect(mockCloudinaryService.uploadImage).toHaveBeenCalledWith(file);
+      expect(mockPrismaService.product.create).toHaveBeenCalledWith({
+        data: {
+          name: mockProduct.name,
+          description: mockProduct.description,
+          price: mockProduct.price,
+          photo: mockProduct.photo,
+          entrepreneurId: mockProduct.entrepreneurId,
+        },
+      });
       expect(result).toEqual(mockProduct);
-      expect(mockPrismaService.product.create).toHaveBeenCalled();
     });
   });
 
@@ -88,4 +107,9 @@ describe('ProductService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
   });
+
+  const mockCloudinaryService = {
+    uploadImage: jest.fn(),
+    deleteImage: jest.fn(),
+  };
 });

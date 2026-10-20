@@ -1,5 +1,6 @@
 import { IsString, IsNumber, IsNotEmpty, IsPositive } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
   @ApiProperty({
@@ -17,15 +18,10 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
   @ApiProperty({ example: 1500, description: 'Precio del producto' })
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   price: number;
-  @ApiProperty({
-    example: 'https://ejemplo.com/taza.jpg',
-    description: 'URL de la foto del producto',
-  })
-  @IsString()
-  @IsNotEmpty()
-  photo: string;
 }

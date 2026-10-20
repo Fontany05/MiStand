@@ -9,18 +9,26 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductResponse } from './interface/product.interface';
 import { FilterProductDto, ProductOrderBy } from './dto/filter-product.dto';
 import { PaginatedProductResponse } from './interface/product.interface';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   async createProduct(
     entrepreneurId: string,
     createDto: CreateProductDto,
+    file: Express.Multer.File,
   ): Promise<ProductResponse> {
+    const result = await this.cloudinaryService.uploadImage(file);
+
     return this.prisma.product.create({
       data: {
         ...createDto,
+        photo: result.secure_url,
         entrepreneurId,
       },
     });

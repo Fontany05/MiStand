@@ -19,6 +19,15 @@ import { ProductResponse } from './interface/product.interface';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { PaginatedProductResponse } from './interface/product.interface';
+import {
+  FileTypeValidator,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes } from '@nestjs/swagger';
 
 @ApiTags('Product')
 @Controller('product')
@@ -28,12 +37,27 @@ export class ProductController {
   @Post()
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Crear producto' })
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Crear producto con foto' })
+  @UseInterceptors(FileInterceptor('photo'))
   create(
     @Request() req: RequestWithUser,
     @Body() createProductDto: CreateProductDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
   ): Promise<ProductResponse> {
-    return this.productService.createProduct(req.user.id, createProductDto);
+    return this.productService.createProduct(
+      req.user.id,
+      createProductDto,
+      file,
+    );
   }
 
   @Get('stand/:entrepreneurId')
