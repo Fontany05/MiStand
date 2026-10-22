@@ -22,4 +22,9 @@ export class CloudinaryService {
   async deleteImage(publicId: string): Promise<void> {
     await cloudinary.uploader.destroy(publicId);
   }
+
+  extractPublicId(url: string): string | null {
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z0-9]+$/i);
+    return match ? match[1] : null;
+  }
 }

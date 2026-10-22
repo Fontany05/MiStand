@@ -16,6 +16,12 @@ const mockPrismaService = {
   },
 };
 
+const mockCloudinaryService = {
+  uploadImage: jest.fn(),
+  deleteImage: jest.fn(),
+  extractPublicId: jest.fn(),
+};
+
 describe('ProductService', () => {
   let service: ProductService;
 
@@ -71,10 +77,15 @@ describe('ProductService', () => {
   });
 
   describe('deleteProduct', () => {
-    it('should delete a product', async () => {
+    it('should delete a product and its image', async () => {
       const mockProduct = createMockProduct();
+
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
       mockPrismaService.product.delete.mockResolvedValue(mockProduct);
+      mockCloudinaryService.extractPublicId.mockReturnValue(
+        'mistand/products/abc123',
+      );
+      mockCloudinaryService.deleteImage.mockResolvedValue(undefined);
 
       const result = await service.deleteProduct(
         mockProduct.id,
@@ -82,6 +93,12 @@ describe('ProductService', () => {
       );
 
       expect(result).toEqual({ message: 'Product deleted successfully' });
+      expect(mockCloudinaryService.extractPublicId).toHaveBeenCalledWith(
+        mockProduct.photo,
+      );
+      expect(mockCloudinaryService.deleteImage).toHaveBeenCalledWith(
+        'mistand/products/abc123',
+      );
     });
 
     it('should throw NotFoundException if product does not exist', async () => {
@@ -91,6 +108,7 @@ describe('ProductService', () => {
       await expect(
         service.deleteProduct(mockProduct.id, mockProduct.entrepreneurId),
       ).rejects.toThrow(NotFoundException);
+      expect(mockCloudinaryService.deleteImage).not.toHaveBeenCalled();
     });
 
     it('should throw ForbiddenException if product does not belong to entrepreneur', async () => {
@@ -105,11 +123,7 @@ describe('ProductService', () => {
       await expect(
         service.deleteProduct(mockProduct.id, mockProduct.entrepreneurId),
       ).rejects.toThrow(ForbiddenException);
+      expect(mockCloudinaryService.deleteImage).not.toHaveBeenCalled();
     });
   });
-
-  const mockCloudinaryService = {
-    uploadImage: jest.fn(),
-    deleteImage: jest.fn(),
-  };
 });

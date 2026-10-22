@@ -125,8 +125,14 @@ export class ProductService {
     }
 
     await this.prisma.product.delete({
-      where: { id, entrepreneurId },
+      where: { id },
     });
+
+    const publicId = this.cloudinaryService.extractPublicId(product.photo);
+    if (publicId) {
+      await this.cloudinaryService.deleteImage(publicId);
+    }
+
     return { message: 'Product deleted successfully' };
   }
 }
