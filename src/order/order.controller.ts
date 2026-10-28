@@ -22,13 +22,13 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { FilterOrderDto } from './dto/filter-order.dto';
 @ApiTags('Order')
+@ApiBearerAuth()
 @Controller('order')
 @UseGuards(JwtGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear orden' })
   create(
     @Request() req: RequestWithUser,
@@ -61,7 +61,6 @@ export class OrderController {
   }
 
   @Delete(':id')
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar pedido' })
   delete(
     @Param('id') id: string,
