@@ -16,7 +16,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import type { RequestWithUser } from '../auth/interface/request.interface';
 import { ProductResponse } from './interface/product.interface';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { PaginatedProductResponse } from './interface/product.interface';
 import {
@@ -38,6 +38,18 @@ export class ProductController {
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'description', 'price', 'photo'],
+      properties: {
+        name: { type: 'string', example: 'Taza artesanal' },
+        description: { type: 'string', example: 'Taza hecha a mano' },
+        price: { type: 'number', example: 1500 },
+        photo: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiOperation({ summary: 'Crear producto con foto' })
   @UseInterceptors(FileInterceptor('photo'))
   create(
