@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { EntrepreneurProfile } from './interface/entrepreneur.interface';
 import type { UpdateEntrepreneurDto } from './dto/update-entrepreneur.dto';
 import * as bcrypt from 'bcrypt';
+import { StandResponse } from './interface/stand.interface';
 
 @Injectable()
 export class EntrepreneurService {
@@ -76,5 +77,23 @@ export class EntrepreneurService {
     });
 
     return { message: 'Account deleted successfully' };
+  }
+
+  async getStand(id: string): Promise<StandResponse> {
+    const entrepreneur = await this.prisma.entrepreneur.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        standName: true,
+        description: true,
+        currentLocation: true,
+        phone: true,
+      },
+    });
+    if (!entrepreneur) {
+      throw new NotFoundException('Stand not found');
+    }
+
+    return entrepreneur;
   }
 }

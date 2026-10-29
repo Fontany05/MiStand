@@ -34,9 +34,10 @@ export class ProductService {
     });
   }
 
-  async getProductsByStand(
+  private async findProducts(
     entrepreneurId: string,
     filters: FilterProductDto,
+    onlyAvailable: boolean,
   ): Promise<PaginatedProductResponse> {
     const { search, available, orderBy, page = 1, limit = 10 } = filters;
 
@@ -44,7 +45,9 @@ export class ProductService {
 
     const where = {
       entrepreneurId,
-      ...(available !== undefined && { available }),
+      ...(onlyAvailable
+        ? { available: true }
+        : available !== undefined && { available }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' as const } },
@@ -76,6 +79,21 @@ export class ProductService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+  async getProductsByStand(
+    entrepreneurId: string,
+    filters: FilterProductDto,
+  ): Promise<PaginatedProductResponse> {
+    return this.findProducts(entrepreneurId, filters, true);
+  }
+
+  async getMyProducts(
+    entrepreneurId: string,
+    filters: FilterProductDto,
+  ): Promise<PaginatedProductResponse> {
+    return this.findProducts(entrepreneurId, filters, false);
+  }
+
   async updateProduct(
     id: string,
     entrepreneurId: string,

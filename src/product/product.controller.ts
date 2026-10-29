@@ -81,6 +81,17 @@ export class ProductController {
     return this.productService.getProductsByStand(entrepreneurId, filters);
   }
 
+  @Get('mine')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar todos mis productos(panel administrador)' })
+  getMine(
+    @Request() req: RequestWithUser,
+    @Query() filters: FilterProductDto,
+  ): Promise<PaginatedProductResponse> {
+    return this.productService.getMyProducts(req.user.id, filters);
+  }
+
   @Patch(':id')
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
